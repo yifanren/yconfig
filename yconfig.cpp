@@ -247,7 +247,6 @@ static int line_to_tree(yconfig_t *yc, const char *line)
 
     // ignore comment
     line_strip_comment(&l, &r, &ele_len);
-
     sname = line_strip_section(&l, &r, &ele_len);
     if (sname)
         yc->sname = string(sname, ele_len);
@@ -266,7 +265,6 @@ static int line_to_tree(yconfig_t *yc, const char *line)
             ret = 1;
             goto quit;
         }
-
         ret = line_insert(yc, yc->sname, val_type, string(key, ele_len), val);
     }
 
@@ -353,4 +351,54 @@ extern "C" const char *yconfig_query_string(yconfig_t *yc, const char *sname, co
             return (const char *)yc->vals[sname][name].val;
 
     return NULL;
+}
+
+extern "C" int yconfig_set_int(yconfig_t *yc, const char *sname, const char *name, int *val)
+{
+    char *sname_new = NULL;
+    sname_new = (char *)malloc(sizeof(sname));
+    char *name_new = NULL;
+    name_new = (char *)malloc(sizeof(name));
+    int *val_new = NULL;
+    val_new = (int *)malloc(sizeof(val));
+
+    strcpy(sname_new, sname);
+    strcpy(name_new, name);
+    val_new = val;
+
+    int ret = line_insert(yc, string(sname_new, strlen(sname_new)), YCONFIG_VALUE_TYPE_INT, string(name_new, strlen(name_new)), val_new);
+    if (ret) {
+        printf("insert failed\n");
+        free(name_new);
+        free(sname_new);
+        free(val_new);
+        return 1;
+    }
+    return 0;
+
+}
+
+
+extern "C" int yconfig_set_string(yconfig_t *yc, const char *sname, const char *name, const char *val)
+{
+    char *sname_new = NULL;
+    sname_new = (char *)malloc(sizeof(sname));
+    char *name_new = NULL;
+    name_new = (char *)malloc(sizeof(name));
+    char *val_new = NULL;
+    val_new = (char *)malloc(sizeof(val));
+
+    strcpy(sname_new, sname);
+    strcpy(name_new, name);
+    strcpy(val_new, val);
+
+    int ret = line_insert(yc, string(sname_new, strlen(sname_new)), YCONFIG_VALUE_TYPE_STRING, string(name_new, strlen(name_new)), val_new);
+    if (ret) {
+        printf("insert failed\n");
+        free(name_new);
+        free(sname_new);
+        free(val_new);
+        return 1;
+    }
+    return 0;
 }
