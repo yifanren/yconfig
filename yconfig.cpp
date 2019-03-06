@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <cstdio>
 
 #define LEN_MAX  4096
 
@@ -324,6 +325,31 @@ extern "C" int yconfig_parse(yconfig_t *yc, const char *filename)
 
 extern "C" int yconfig_file(yconfig_t *yc, const char *filename)
 {
+    FILE *fp = NULL;
+
+    fp = fopen(filename, "w+");
+    if (!fp)
+        return 1;
+
+    if (yc) {
+        for (map<string, map<string, yconfig_val_t> >::iterator it
+                = yc->vals.begin(); it != yc->vals.end(); ++it){
+            fprintf(fp, "%s%s%s", "[", it->first.c_str(), "]\n");
+            for (map<string, yconfig_val_t>::iterator it2
+                    = it->second.begin(); it2 != it->second.end(); ++it2) {
+                fprintf(fp, "%s%s", it2->first.c_str(), " = ");
+                if (it2->second.type == YCONFIG_VALUE_TYPE_STRING) {
+					fprintf(fp, "%s%s%s", "\"", (char *)(it2->second.val), "\"");
+                }
+                else if (it2->second.type == YCONFIG_VALUE_TYPE_INT) {
+					fprintf(fp, "%d", *(int *)(it2->second.val));
+                }
+                fputs("\n", fp);
+            }
+        }
+    }
+
+    fclose(fp);
     return 1;
 }
 
